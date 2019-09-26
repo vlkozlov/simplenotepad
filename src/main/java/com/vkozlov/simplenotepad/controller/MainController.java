@@ -1,8 +1,10 @@
 package com.vkozlov.simplenotepad.controller;
 
 import com.vkozlov.simplenotepad.domain.Note;
+import com.vkozlov.simplenotepad.domain.User;
 import com.vkozlov.simplenotepad.repo.NoteRepo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,32 +23,33 @@ public class MainController {
     }
 
     @GetMapping("/main")
-    public String main(Map <String, Object> model) {
-        Iterable<Note> notes = noteRepo.findAll();
+    public String main(@AuthenticationPrincipal User user, Map <String, Object> model) {
+        Iterable<Note> notes = noteRepo.findByUser_id(user.getId());
         model.put("notes", notes);
 
         return "main";
     }
 
     @PostMapping("/main")
-    public String add(@RequestParam String text, @RequestParam String priority, Map <String, Object> model) {
-        Note note = new Note(text, priority);
+    public String add(@AuthenticationPrincipal User user, @RequestParam String text, @RequestParam String priority,
+                      Map <String, Object> model) {
+        Note note = new Note(text, priority, user);
         noteRepo.save(note);
 
-        Iterable<Note> notes = noteRepo.findAll();
+        Iterable<Note> notes = noteRepo.findByUser_id(user.getId());
         model.put("notes", notes);
 
         return "main";
     }
 
     @PostMapping("filter")
-    public String filter(@RequestParam String filter, Map <String, Object> model) {
+    public String filter(@AuthenticationPrincipal User user, @RequestParam String filter, Map <String, Object> model) {
         Iterable<Note> notes;
 
         if (filter != null && !filter.isEmpty()) {
-            notes = noteRepo.findByPriority(filter);
+            notes = noteRepo.findByUser_idAndPriority(user.getId(), filter);
         } else {
-            notes = noteRepo.findAll();
+            notes = noteRepo.findByUser_id(user.getId());
         }
         model.put("notes", notes);
 
