@@ -6,6 +6,7 @@ import com.vkozlov.simplenotepad.repo.NoteRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -23,9 +24,17 @@ public class MainController {
     }
 
     @GetMapping("/main")
-    public String main(@AuthenticationPrincipal User user, Map <String, Object> model) {
+    public String main(@RequestParam(required = false, defaultValue = "") String filter, @AuthenticationPrincipal User user, Model model) {
         Iterable<Note> notes = noteRepo.findByUser_id(user.getId());
-        model.put("notes", notes);
+
+        if (filter != null && !filter.isEmpty()) {
+            notes = noteRepo.findByUser_idAndPriority(user.getId(), filter);
+        } else {
+            notes = noteRepo.findByUser_id(user.getId());
+        }
+
+        model.addAttribute("notes", notes);
+        model.addAttribute("filter", filter);
 
         return "main";
     }
@@ -37,20 +46,6 @@ public class MainController {
         noteRepo.save(note);
 
         Iterable<Note> notes = noteRepo.findByUser_id(user.getId());
-        model.put("notes", notes);
-
-        return "main";
-    }
-
-    @PostMapping("filter")
-    public String filter(@AuthenticationPrincipal User user, @RequestParam String filter, Map <String, Object> model) {
-        Iterable<Note> notes;
-
-        if (filter != null && !filter.isEmpty()) {
-            notes = noteRepo.findByUser_idAndPriority(user.getId(), filter);
-        } else {
-            notes = noteRepo.findByUser_id(user.getId());
-        }
         model.put("notes", notes);
 
         return "main";
