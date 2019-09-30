@@ -21,8 +21,8 @@
     <div>Список заметок</div>
     <#list notes as note>
     <div>
-        <b>${priority}</b>
-        <span>${text}</span>
+        <b>${note.priority}</b>
+        <span>${note.text}</span>
     </div>
     <#else>
     Список пуст
