@@ -9,7 +9,6 @@ public class Note {
     private Integer id;
     private String text;
     private String priority;
-    private String filename;
 
     @ManyToOne(fetch =  FetchType.EAGER)
     @JoinColumn(name = "user_id")
@@ -54,13 +53,5 @@ public class Note {
 
     public void setUser(User user) {
         this.user = user;
-    }
-
-    public String getFilename() {
-        return filename;
-    }
-
-    public void setFilename(String filename) {
-        this.filename = filename;
     }
 }
